@@ -17,8 +17,26 @@ type Address struct {
     City  string `json:"city,omitempty"`
     State string `json:"state,omitempty"`
 }
+type JamesBondPhrase struct {
+    Phrase  string   `json:"jamesbondphrase,omitempty"`
+}
 
 var people []Person
+var phrases []JamesBondPhrase
+
+func GetJamesBondPhrase(w http.ResponseWriter, r *http.Request){
+    params := mux.Vars(r)
+    var phrase JamesBondPhrase
+    for _, item := range people {
+        if item.ID == params["id"] {
+            JamesBond := item.Lastname + ", " + item.Firstname + " " + item.Lastname
+            phrase.Phrase = JamesBond
+            // phrases = append(phrases, phrase)
+            json.NewEncoder(w).Encode(phrase)
+            return
+        }
+    }
+}
 
 func GetPeople(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(people)
@@ -63,10 +81,12 @@ func main() {
     people = append(people, Person{ID: "1", Firstname: "John", Lastname: "Doe", Address: &Address{City: "City X", State: "State X"}})
     people = append(people, Person{ID: "2", Firstname: "Koko", Lastname: "Doe", Address: &Address{City: "City Z", State: "State Y"}})
     people = append(people, Person{ID: "3", Firstname: "Francis", Lastname: "Sunday"})
+    people = append(people, Person{ID: "4", Firstname: "Anna", Lastname: "Heikkila", Address: &Address{City: "Solna", State: "Uppland"}})
     router.HandleFunc("/people", GetPeople).Methods("GET")
     router.HandleFunc("/people/{id}", GetPerson).Methods("GET")
     router.HandleFunc("/people/{id}", CreatePerson).Methods("POST")
     router.HandleFunc("/people/{id}", DeletePerson).Methods("DELETE")
+    router.HandleFunc("/people/jb/{id}", GetJamesBondPhrase).Methods("GET")
     log.Fatal(http.ListenAndServe(":8000", router))
 
 
